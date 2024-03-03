@@ -1,0 +1,88 @@
+[
+    {
+        "model": "users.user",
+        "pk": 1,
+        "fields": {
+            "email": "john@example.com",
+            "phone": "1234567890",
+            "city": "New York",
+            "avatar": "avatars/john_avatar.jpg"
+        }
+    },
+    {
+        "model": "courses.course",
+        "pk": 1,
+        "fields": {
+            "title": "Introduction to Django2",
+            "preview": "previews/django_preview.jpg",
+            "description": "A comprehensive introduction to Django framework."
+        }
+    },
+    {
+        "model": "courses.lesson",
+        "pk": 1,
+        "fields": {
+            "title": "Setting Up Django Project",
+            "description": "Learn how to set up a Django project.",
+            "preview": "lesson_previews/setup_lesson_preview.jpg",
+            "video_link": "https://example.com/django_setup_video",
+            "course": 1
+        }
+    },
+    {
+        "model": "users.payment",
+        "pk": 1,
+        "fields": {
+            "user": 1,
+            "payment_date": "2022-02-14",
+            "paid_course": 1,
+            "paid_lesson": 1,
+            "amount": 50.00,
+            "payment_method": "cash"
+        }
+    },
+
+
+        {
+        "model": "users.user",
+        "pk": 2,
+        "fields": {
+            "email": "john2@example.com",
+            "phone": "12345678907",
+            "city": "New York",
+            "avatar": "avatars/john_avatar.jpg"
+        }
+    },
+    {
+        "model": "courses.course",
+        "pk": 2,
+        "fields": {
+            "title": "Introduction to Django",
+            "preview": "previews/django_preview.jpg",
+            "description": "A comprehensive introduction to Django framework."
+        }
+    },
+    {
+        "model": "courses.lesson",
+        "pk": 2,
+        "fields": {
+            "title": "Setting Up Django Project",
+            "description": "Learn how to set up a Django project.",
+            "preview": "lesson_previews/setup_lesson_preview.jpg",
+            "video_link": "https://example.com/django_setup_video",
+            "course": 1
+        }
+    },
+    {
+        "model": "users.payment",
+        "pk": 2,
+        "fields": {
+            "user": 1,
+            "payment_date": "2022-02-14",
+            "paid_course": 2,
+            "paid_lesson": 1,
+            "amount": 50.00,
+            "payment_method": "cash"
+        }
+    }
+]

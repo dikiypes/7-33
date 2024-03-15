@@ -36,7 +36,7 @@ class User(AbstractUser):
     email = models.EmailField(unique=True)
     phone = models.CharField(max_length=15)
     city = models.CharField(max_length=255)
-    avatar = models.ImageField(upload_to='avatars/')
+    avatar = models.ImageField(upload_to='media/avatars/')
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
     objects = CustomUserManager()

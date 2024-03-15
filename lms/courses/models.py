@@ -3,7 +3,7 @@ from django.db import models
 
 class Course(models.Model):
     title = models.CharField(max_length=255)
-    preview = models.ImageField(upload_to='previews/')
+    preview = models.ImageField(upload_to='media/course_previews/')
     description = models.TextField()
     owner = models.ForeignKey('users.User', on_delete=models.CASCADE)
 
@@ -11,7 +11,7 @@ class Course(models.Model):
 class Lesson(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField()
-    preview = models.ImageField(upload_to='lesson_previews/')
+    preview = models.ImageField(upload_to='media/lesson_previews/')
     video_link = models.URLField()
     course = models.ForeignKey('courses.Course', related_name='lessons', on_delete=models.CASCADE)
     owner = models.ForeignKey('users.User', on_delete=models.CASCADE)

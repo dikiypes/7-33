@@ -7,6 +7,9 @@ from rest_framework.response import Response
 from .paginators import CustomPaginator
 from django.shortcuts import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
+from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
+from .tasks import was_updated_recently, send_course_update_notifications, send_lesson_update_notifications
 
 
 class CourseViewSet(viewsets.ModelViewSet):
@@ -15,6 +18,9 @@ class CourseViewSet(viewsets.ModelViewSet):
     permission_classes = [IsModerator | IsOwner | IsAuthenticated]
 
     def perform_create(self, serializer):
+        """
+        Сохраняет новый объект при помощи сериализатора,
+        """
         serializer.save(owner=self.request.user)
 
     def create(self, request, *args, **kwargs):
@@ -25,6 +31,12 @@ class CourseViewSet(viewsets.ModelViewSet):
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
     def get_queryset(self):
+        """
+        Возвращает курсы, которые должны быть отображены для текущего пользователя.
+        Если пользователь является модератором, возвращает все курсы.
+        Если пользователь не является модератором, возвращает только те курсы,
+        которые были созданы этим пользователем.
+        """
         if self.request.user.is_authenticated:
             if self.request.user.groups.filter(name='Moderators').exists():
                 return Course.objects.all()
@@ -33,6 +45,17 @@ class CourseViewSet(viewsets.ModelViewSet):
         else:
             return Course.objects.none()
 
+    def perform_update(self, serializer) -> None:
+        """
+        Обновляет объект курса и отправляет уведомление об обновлении подписчикам курса,
+        если после последнего обновления курса прошло 60 секунд и больше.
+        """
+        instance = self.get_object()
+        last_course_update = instance.updated_at
+        instance = serializer.save()
+        if not was_updated_recently(last_course_update):
+            send_course_update_notifications.delay(instance.id)
+
 
 class LessonCreateView(generics.CreateAPIView):
     queryset = Lesson.objects.all()
@@ -40,6 +63,9 @@ class LessonCreateView(generics.CreateAPIView):
     permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
+        """
+        Сохраняет новый объект при помощи сериализатора,
+        """
         serializer.save(owner=self.request.user)
 
 
@@ -49,6 +75,12 @@ class LessonListView(generics.ListAPIView):
     pagination_class = CustomPaginator
 
     def get_queryset(self):
+        """
+        Возвращает уроки, которые должны быть отображены для текущего пользователя.
+        Если пользователь является модератором, возвращает все уроки.
+        Если пользователь не является модератором, возвращает только те уроки,
+        которые были созданы этим пользователем.
+        """
         if self.request.user.is_authenticated:
             # Если пользователь модератор, возвращаем все уроки
             if self.request.user.groups.filter(name='Moderators').exists():
@@ -85,6 +117,20 @@ class LessonUpdateView(generics.UpdateAPIView):
     serializer_class = LessonSerializer
     permission_classes = [IsModerator | IsOwner | IsAuthenticated]
     lookup_field = 'pk'
+
+    def perform_update(self, serializer) -> None:
+        """
+        Обновляет объект урока и отправляет уведомление подписчикам курса, в который
+        входит этот урок, если после последнего обновления курса прошло 60 секунд и больше.
+        При обновлении урока, также обновляется и время последнего обновления курса.
+        """
+        instance = self.get_object()
+        last_course_update = instance.course.updated_at
+        instance = serializer.save()
+        instance.course.update_at = datetime.now()
+        instance.course.save()
+        if not was_updated_recently(last_course_update):
+            send_lesson_update_notifications.delay(instance.id)
 
 
 class SubscriptionView(APIView):

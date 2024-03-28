@@ -3,6 +3,7 @@ from rest_framework.routers import DefaultRouter
 from .views import CourseViewSet, SubscriptionView
 from .views import LessonCreateView, LessonDetailView, LessonDestroyView, LessonUpdateView, LessonListView
 
+
 router = DefaultRouter()
 router.register(r'courses', CourseViewSet)
 
